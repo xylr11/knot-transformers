@@ -176,3 +176,7 @@ cython_debug/
 # Data Files
 dataNamesVolsJ2J3.txt
 nameJ2zerosJ3zerosvol.txt
+knots_dataset.pt
+
+# Visual Studio Code
+.vscode/
