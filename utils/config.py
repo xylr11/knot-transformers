@@ -1,3 +1,4 @@
+import importlib
 import json
 from pathlib import Path
 
@@ -9,10 +10,7 @@ def load_config(path):
         config = json.load(f)
     return config
 
-def get_loss(name, params):
-    module = __import__(f"losses.{name}", fromlist=[""])
-    return module.Loss(**params)
-
-def get_model(name, params):
-    module = __import__(f"models.{name}", fromlist=[""])
-    return module.Model(**params)
+def get_class(module_path, class_name):
+    """Dynamically import and return a class given its module path and class name."""
+    module = importlib.import_module(module_path)
+    return getattr(module, class_name)

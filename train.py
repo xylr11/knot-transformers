@@ -1,24 +1,32 @@
+import argparse
 from data.loader import get_dataloaders
 import torch
 from tqdm import tqdm
 import torch.optim as optim
 from utils.config import load_config
-from utils.config import get_model
-from utils.config import get_loss
+from utils.config import get_class
 
-def train(config_path):
+def train(config_path="config/default.json"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     config = load_config(config_path)
 
-    model = get_model(config['model'], config['model_params'])
-    loss_fn = get_loss(config['loss'], config['loss_params'])
+    ModelClass = get_class("models", config["model"])
+    model = ModelClass(**config["model_params"]).to(device)
+    print(f"Loaded model: {model.__class__.__name__}, Params: {config['model_params']}")
+
+    LossClass = get_class("losses", config["loss"])
+    loss_fn = LossClass(**config["loss_params"])
+    print(f"Loaded loss: {loss_fn.__class__.__name__}, Params: {config['loss_params']}")
+
     optimizer = optim.Adam(model.parameters(), lr=config['train_params']['lr'])
     num_epochs = config['train_params']['num_epochs']
 
     train_loader, val_loader, test_loader = get_dataloaders(
         batch_size=config['train_params']['batch_size']
     )
+    
+    print(f"Loaded optimizer and dataloaders.")
 
     best_val_loss = float('inf')
     best_model_state = None
@@ -66,4 +74,8 @@ def train(config_path):
     torch.save(best_model_state, "best_model.pt")
 
 if __name__ == "__main__":
-    pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, required=False)
+    # Should add debug mode here
+    args = parser.parse_args()
+    train(args.config)
