@@ -52,7 +52,7 @@ def knots_collate_fn(batch):
     return X_in_padded, mask_in, X_tar_with_conf
 
 def get_dataloaders(batch_size = 32, num_workers = 2, random_state = 42,
-                     train_size = 0.2, val_size = 0.5, path = "knots_dataset.pt"):
+                     train_size = 0.2, val_size = 0.5, path = "datasets/knots_dataset.pt"):
     """
     Returns train, val, test DataLoaders for the knots dataset.
     Args:
