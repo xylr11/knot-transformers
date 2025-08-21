@@ -1,51 +1,85 @@
-import itertools
 import os
+import itertools
 import json
 
-# Grid values
-param_grid = {
-    "lambda_coord": [1.0],
-    "lambda_conf": [0.1],
-    "lambda_reg": [0.1],
-    "alpha": [10.0],
-}
+def generate_configs_jobs(): 
+    # Maybe make reference default.json instead
+    base_config = {
+        "model": "SetTransformer",
+        "loss": "ChamferLoss",
+        "model_params": {
+            "dim_input": 2,
+            "hidden_dim": 128,
+            "num_outputs": 49,
+            "num_heads": 4
+        },
+        "loss_params": {
+            "lambda_coord": 1.0,
+            "lambda_conf": 1.0,
+            "lambda_reg": 0.1,
+            "alpha": 10.0
+        },
+        "train_params": {
+            "batch_size": 32,
+            "num_epochs": 20,
+            "lr": 1e-3
+        }
+    }
 
-# Where to save jobs/configs
-job_dir = "jobs"
-os.makedirs(job_dir, exist_ok=True)
+    grid = {
+        "loss_params.lambda_coord": [2.0],
+        "loss_params.lambda_conf": [1.0],
+        "loss_params.lambda_reg": [0.1],
+        "loss_params.alpha": [10.0],
+        "train_params.lr": [1e-3, 5e-4]
+    }
 
-# Base SLURM header
-slurm_header = """#!/bin/bash
-#SBATCH --job-name={job_name}
-#SBATCH --output=logs/{job_name}.out
-#SBATCH --error=logs/{job_name}.err
+    os.makedirs("configs", exist_ok=True)
+    os.makedirs("jobs", exist_ok=True)
+    os.makedirs("logs", exist_ok=True)
+
+    def set_nested(d, key_path, value):
+        keys = key_path.split(".")
+        for k in keys[:-1]:
+            d = d[k]
+        d[keys[-1]] = value
+
+    param_names = list(grid.keys())
+    param_values = list(grid.values())
+    all_combinations = list(itertools.product(*param_values))
+
+    for i, combo in enumerate(all_combinations):
+        config = json.loads(json.dumps(base_config))
+
+        # Apply hyperparams
+        for k, v in zip(param_names, combo):
+            set_nested(config, k, v)
+
+        # File-friendly name
+        tag = "_".join(f"{k.split('.')[-1]}-{v}".replace(".", "p") for k, v in zip(param_names, combo))
+
+        config_path = f"configs/config_{i}_{tag}.json"
+        with open(config_path, "w") as f:
+            json.dump(config, f, indent=2)
+
+        # Write job script
+        job_path = f"jobs/job_{i}_{tag}.sh"
+        with open(job_path, "w") as f:
+            f.write(f"""#!/bin/bash
+#SBATCH --job-name=gs_{i}
+#SBATCH --output=logs/job_{i}_{tag}.out
+#SBATCH --error=logs/job_{i}_{tag}.err
 #SBATCH --time=04:00:00
-#SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 
-module load cuda/11.8  # UPDATE TO CORRECT MODULES
-source ~/envs/myenv/bin/activate  # UPDATE TO CORRECT VENV PATH
-"""
+# LOAD MODULES, ACTIVATE ENV, ETC.
 
-# Iterate through all hyperparameter combinations
-keys = list(param_grid.keys())
-for values in itertools.product(*param_grid.values()):
-    params = dict(zip(keys, values))
+python train.py --config {config_path}
+""")
 
-    # Unique name for job
-    job_name = "gs_" + "_".join(f"{k}{v}" for k, v in params.items())
+    print(f"Generated {len(all_combinations)} configs + jobs.")
 
-    # Config file
-    config_path = os.path.join(job_dir, f"{job_name}.json")
-    with open(config_path, "w") as f:
-        json.dump(params, f, indent=2)
-
-    # Slurm script
-    script_path = os.path.join(job_dir, f"{job_name}.sh")
-    with open(script_path, "w") as f:
-        f.write(slurm_header.format(job_name=job_name))
-        f.write(f"\npython train.py --config {config_path}\n")
-
-print(f"Generated {len(list(itertools.product(*param_grid.values())))} jobs in {job_dir}/")
+if __name__ == "__main__":
+    generate_configs_jobs()
