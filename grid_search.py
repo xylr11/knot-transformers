@@ -62,7 +62,7 @@ def generate_configs_jobs():
         with open(config_path, "w") as f:
             json.dump(config, f, indent=2)
 
-        # Write job script
+        # Write job script from default
         job_path = f"jobs/job_{i}_{tag}.sh"
         with open(job_path, "w") as f:
             f.write(f"""#!/bin/bash

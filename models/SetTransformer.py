@@ -40,7 +40,7 @@ class ISAB(nn.Module):
 
 class Encoder(nn.Module):
     """Encodes input points with mask."""
-    def __init__(self, dim_in=2, hidden_dim=128, num_heads=4, num_layers=2):
+    def __init__(self, dim_in=2, hidden_dim=128, num_heads=4, num_layers=10):
         super().__init__()
         self.layers = nn.ModuleList([
             ISAB(dim_in if i == 0 else hidden_dim, hidden_dim, num_heads, num_inds=16)
@@ -55,7 +55,7 @@ class Encoder(nn.Module):
         return H
 
 class CrossDecoder(nn.Module):
-    def __init__(self, hidden_dim=128, num_heads=4, num_outputs=64, num_layers=3):
+    def __init__(self, hidden_dim=128, num_heads=4, num_outputs=64, num_layers=10):
         super().__init__()
         self.num_outputs = num_outputs
         self.slot_emb = nn.Parameter(torch.randn(num_outputs, hidden_dim))
