@@ -74,7 +74,9 @@ def generate_configs_jobs():
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 
-# LOAD MODULES, ACTIVATE ENV, ETC.
+module load python/3.12
+module load cuda/13.0
+module load cudnn/9.12.0
 
 python train.py --config {config_path}
 """)

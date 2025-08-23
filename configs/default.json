@@ -3,7 +3,7 @@
   "loss": "ChamferLoss",
   "model_params": {
     "dim_input": 2,
-    "hidden_dim": 512,
+    "hidden_dim": 256,
     "num_outputs": 49,
     "num_heads": 4
   },
@@ -15,7 +15,7 @@
   },
   "train_params": {
     "batch_size": 32,
-    "num_epochs": 20,
+    "num_epochs": 1,
     "lr": 1e-3
   }
 }
