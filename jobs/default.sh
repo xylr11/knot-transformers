@@ -11,4 +11,6 @@ module load python/3.12
 module load cuda/13.0
 module load cudnn/9.12.0
 
-python train.py --config configs/default.json
+source .venv/bin/activate
+
+python train.py --config configs/default.json --save states/best_model_default.pt

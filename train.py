@@ -6,7 +6,7 @@ import torch.optim as optim
 from utils.config import load_config
 from utils.config import get_class
 
-def train(config_path="config/default.json"):
+def train(config_path="config/default.json", save_path="states/best_model_default.pt"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     config = load_config(config_path)
@@ -71,11 +71,11 @@ def train(config_path="config/default.json"):
 
         print(f"Epoch {epoch+1} - Train Loss: {avg_train_loss:.4f} - Val Loss: {avg_val_loss:.4f}")
 
-    torch.save(best_model_state, "best_model.pt")
+    torch.save(best_model_state, save_path)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, required=False)
-    # Should add debug mode here
+    parser.add_argument('--save', type=str, required=False)
     args = parser.parse_args()
-    train(args.config)
+    train(args.config, args.save)

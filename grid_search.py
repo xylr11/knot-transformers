@@ -78,7 +78,7 @@ module load python/3.12
 module load cuda/13.0
 module load cudnn/9.12.0
 
-python train.py --config {config_path}
+python train.py --config {config_path} --save states/best_model_{i}_{tag}.pt
 """)
 
     print(f"Generated {len(all_combinations)} configs + jobs.")
