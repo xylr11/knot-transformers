@@ -174,9 +174,10 @@ cython_debug/
 .pypirc
 
 # Data Files
-dataNamesVolsJ2J3.txt
-nameJ2zerosJ3zerosvol.txt
-knots_dataset.pt
+datasets/
+
+# Model States
+states/
 
 # Visual Studio Code
 .vscode/
