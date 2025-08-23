@@ -3,9 +3,13 @@
 #SBATCH --output=logs/job_default.out
 #SBATCH --error=logs/job_default.err
 #SBATCH --time=04:00:00
-#SBATCH --gres=gpu:1
-#SBATCH --mem=16G
+#SBATCH --gpus=1
 #SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --mail-user=kylecmarkham@gmail.com
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
 
 module load python/3.12
 module load cuda/13.0
