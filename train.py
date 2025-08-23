@@ -8,6 +8,8 @@ from utils.config import get_class
 
 def train(config_path="config/default.json", save_path="states/best_model_default.pt"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("CUDA available:", torch.cuda.is_available(), "Device count:", torch.cuda.device_count())
+    print("Using device:", device)
 
     config = load_config(config_path)
 
