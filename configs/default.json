@@ -15,7 +15,7 @@
   },
   "train_params": {
     "batch_size": 32,
-    "num_epochs": 1,
+    "num_epochs": 25,
     "lr": 1e-3
   }
 }
