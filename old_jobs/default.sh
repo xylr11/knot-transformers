@@ -12,6 +12,8 @@
 #SBATCH --mail-type=FAIL
 
 module load python/3.12
+module load cuda
+module load cudnn
 
 source .venv/bin/activate
 

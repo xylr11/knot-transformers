@@ -9,7 +9,7 @@ def generate_configs_jobs():
         "loss": "ChamferLoss",
         "model_params": {
             "dim_input": 2,
-            "hidden_dim": 128,
+            "hidden_dim": 256,
             "num_outputs": 49,
             "num_heads": 4
         },
@@ -21,17 +21,17 @@ def generate_configs_jobs():
         },
         "train_params": {
             "batch_size": 32,
-            "num_epochs": 20,
+            "num_epochs": 10,
             "lr": 1e-3
         }
     }
 
     grid = {
-        "loss_params.lambda_coord": [2.0],
-        "loss_params.lambda_conf": [1.0],
-        "loss_params.lambda_reg": [0.1],
-        "loss_params.alpha": [10.0],
-        "train_params.lr": [1e-3, 5e-4]
+        "loss_params.lambda_coord": [1.0, 1.5, 2.0],
+        "loss_params.lambda_conf": [0.5, 1.0],
+        "loss_params.lambda_reg": [0.01, 0.1, 1.0],
+        "loss_params.alpha": [10.0, 20.0],
+        "train_params.lr": [1e-3]
     }
 
     os.makedirs("configs", exist_ok=True)
@@ -69,14 +69,18 @@ def generate_configs_jobs():
 #SBATCH --job-name=gs_{i}
 #SBATCH --output=logs/job_{i}_{tag}.out
 #SBATCH --error=logs/job_{i}_{tag}.err
-#SBATCH --time=04:00:00
+#SBATCH --time=01:00:00
 #SBATCH --gres=gpu:1
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
+#SBATCH --mail-user=kylecm11@byu.edu
+#SBATCH --mail-type=FAIL
 
 module load python/3.12
-module load cuda/13.0
-module load cudnn/9.12.0
+module load cuda
+module load cudnn
+
+source .venv/bin/activate
 
 python train.py --config {config_path} --save states/best_model_{i}_{tag}.pt
 """)
