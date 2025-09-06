@@ -3,10 +3,10 @@
   "loss": "HungarianLoss",
   "model_params": {
     "dim_input": 2,
-    "hidden_dim": 512,
+    "hidden_dim": 256,
     "num_outputs": 49,
     "num_heads": 4,
-    "num_layers": 6
+    "num_layers": 3
   },
   "loss_params": {
     "lambda_coord": 2.0,
@@ -15,7 +15,7 @@
   },
   "train_params": {
     "batch_size": 32,
-    "num_epochs": 1,
+    "num_epochs": 10,
     "lr": 1e-3
   }
 }

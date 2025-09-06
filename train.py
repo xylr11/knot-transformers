@@ -8,7 +8,8 @@ from utils.config import get_class
 
 def train(config_path="config/default.json", save_path="states/best_model_default.pt"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("CUDA available:", torch.cuda.is_available(), "Device count:", torch.cuda.device_count())
+    print("CUDA available:", torch.cuda.is_available())
+    print("Device count:", torch.cuda.device_count())
     print("Using device:", device)
 
     config = load_config(config_path)
@@ -16,6 +17,8 @@ def train(config_path="config/default.json", save_path="states/best_model_defaul
     ModelClass = get_class("models", config["model"])
     model = ModelClass(**config["model_params"]).to(device)
     print(f"Loaded model: {model.__class__.__name__}, Params: {config['model_params']}")
+    total_params = sum(param.numel() for param in model.parameters())
+    print(f"Total number of parameters: {total_params}")
 
     LossClass = get_class("losses", config["loss"])
     loss_fn = LossClass(**config["loss_params"])
