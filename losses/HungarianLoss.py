@@ -10,10 +10,11 @@ class HungarianLoss(nn.Module):
         lambda_coord (float): Weight for coordinate loss.
         lambda_conf (float): Weight for confidence loss.
     """
-    def __init__(self, lambda_coord=1.0, lambda_conf=1.0):
+    def __init__(self, lambda_coord=1.0, lambda_conf=1.0, lambda_reg=0.1):
         super().__init__()
         self.lambda_coord = lambda_coord
         self.lambda_conf = lambda_conf
+        self.lambda_reg = lambda_reg
 
     def forward(self, pred, target):
         B, M, _ = pred.shape
@@ -55,5 +56,8 @@ class HungarianLoss(nn.Module):
             matched_tgt_conf = tgt_conf[col_ind]
             loss_conf += F.binary_cross_entropy(matched_pred_conf, matched_tgt_conf)
 
-        total_loss = self.lambda_coord * loss_coord / B + self.lambda_conf * loss_conf / B
+        # Penalize high conf
+        reg_loss = (pred_conf ** 2).mean()
+
+        total_loss = self.lambda_coord * loss_coord / B + self.lambda_conf * loss_conf / B + self.lambda_reg * reg_loss
         return total_loss
