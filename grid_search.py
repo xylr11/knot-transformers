@@ -12,7 +12,7 @@ def generate_configs_jobs():
             "hidden_dim": 256,
             "num_outputs": 49,
             "num_heads": 4,
-            "num_layers": 6
+            "num_layers": 3
         },
         "loss_params": {
             "lambda_coord": 1.0,
@@ -28,10 +28,8 @@ def generate_configs_jobs():
 
     grid = {
         "loss_params.lambda_coord": [1.0, 1.5, 2.0],
-        "loss_params.lambda_conf": [0.5, 1.0],
-        "loss_params.lambda_reg": [0.01, 0.1, 1.0],
-        "loss_params.alpha": [10.0, 20.0],
-        "train_params.lr": [1e-3]
+        "loss_params.lambda_conf": [0.5, 1.0, 1.5],
+        "loss_params.lambda_reg": [0.01, 0.1, 1.0]
     }
 
     os.makedirs("configs", exist_ok=True)
@@ -69,7 +67,7 @@ def generate_configs_jobs():
 #SBATCH --job-name=gs_{i}
 #SBATCH --output=logs/job_{i}_{tag}.out
 #SBATCH --error=logs/job_{i}_{tag}.err
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 #SBATCH --gres=gpu:1
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
