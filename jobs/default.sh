@@ -17,4 +17,4 @@ module load cudnn
 
 source .venv/bin/activate
 
-python train.py --config configs/default.json --save states/best_model_large_default.pt
+python train.py --config configs/default.json --save states/large_hungarian.pt

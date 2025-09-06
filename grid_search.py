@@ -6,18 +6,18 @@ def generate_configs_jobs():
     # Maybe make reference default.json instead
     base_config = {
         "model": "SetTransformer",
-        "loss": "ChamferLoss",
+        "loss": "HungarianLoss",
         "model_params": {
             "dim_input": 2,
             "hidden_dim": 256,
             "num_outputs": 49,
-            "num_heads": 4
+            "num_heads": 4,
+            "num_layers": 6
         },
         "loss_params": {
             "lambda_coord": 1.0,
             "lambda_conf": 1.0,
-            "lambda_reg": 0.1,
-            "alpha": 10.0
+            "lambda_reg": 0.1
         },
         "train_params": {
             "batch_size": 32,

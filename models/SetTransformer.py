@@ -87,10 +87,10 @@ class CrossDecoder(nn.Module):
 
 class SetTransformer(nn.Module):
     """Full set-to-set predictor."""
-    def __init__(self, dim_input=2, hidden_dim=128, num_outputs=64, num_heads=4):
+    def __init__(self, dim_input=2, hidden_dim=512, num_outputs=64, num_heads=4, num_layers=6):
         super().__init__()
-        self.encoder = Encoder(dim_input, hidden_dim, num_heads)
-        self.decoder = CrossDecoder(hidden_dim, num_heads, num_outputs)
+        self.encoder = Encoder(dim_input, hidden_dim, num_heads, num_layers)
+        self.decoder = CrossDecoder(hidden_dim, num_heads, num_outputs, num_layers)
 
     def forward(self, X, mask):
         H = self.encoder(X, mask)

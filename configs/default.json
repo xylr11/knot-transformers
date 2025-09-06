@@ -1,21 +1,21 @@
 {
   "model": "SetTransformer",
-  "loss": "ChamferLoss",
+  "loss": "HungarianLoss",
   "model_params": {
     "dim_input": 2,
     "hidden_dim": 512,
     "num_outputs": 49,
-    "num_heads": 4
+    "num_heads": 4,
+    "num_layers": 6
   },
   "loss_params": {
     "lambda_coord": 2.0,
-    "lambda_conf": 1.0,
-    "lambda_reg": 0.5,
-    "alpha": 15.0
+    "lambda_conf": 0.5,
+    "lambda_reg": 0.01
   },
   "train_params": {
     "batch_size": 32,
-    "num_epochs": 25,
+    "num_epochs": 1,
     "lr": 1e-3
   }
 }
