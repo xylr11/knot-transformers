@@ -2,7 +2,7 @@
 #SBATCH --job-name=large_default
 #SBATCH --output=logs/job_large_default.out
 #SBATCH --error=logs/job_large_default.err
-#SBATCH --time=08:00:00
+#SBATCH --time=00:30:00
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
