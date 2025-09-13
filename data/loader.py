@@ -35,6 +35,8 @@ def knots_collate_fn(batch):
     mask_in = torch.zeros(X_in_padded.shape[:2], dtype=torch.bool)
     for i, x in enumerate(X_in_list):
         mask_in[i, :x.size(0)] = True
+        if x.shape[0] == 0:
+            raise ValueError(f"Empty input at sample {i}")
 
     # Target padding + confidence
     X_tar_padded = pad_sequence(X_tar_list, batch_first=True, padding_value=0.0)
@@ -47,7 +49,7 @@ def knots_collate_fn(batch):
 
     for i, x in enumerate(X_tar_list):
         L = x.size(0)
-        X_tar_with_conf[i, :L, 2] = 1.0  # confidence = 1 for real points
+        X_tar_with_conf[i, :L, 2] = 1.0  # confidence = 1 for real points        
 
     return X_in_padded, mask_in, X_tar_with_conf
 
@@ -71,8 +73,8 @@ def get_dataloaders(batch_size = 32, num_workers = 2, random_state = 42,
     
     # Create indices for splitting
     indices = list(range(len(dataset)))
-    train_indices, valtest_indices = train_test_split(indices, test_size=train_size, random_state=random_state)
-    val_indices, test_indices = train_test_split(valtest_indices, test_size=val_size, random_state=random_state)
+    train_indices, valtest_indices = train_test_split(indices, train_size=train_size, random_state=random_state)
+    val_indices, test_indices = train_test_split(valtest_indices, train_size=val_size, random_state=random_state)
 
     # Use Subset to create datasets for splits
     train_dataset = Subset(dataset, train_indices)
