@@ -181,3 +181,8 @@ states/
 
 # Visual Studio Code
 .vscode/
+
+.out
+.err
+.sh
+.json
