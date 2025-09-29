@@ -11,7 +11,7 @@ class ChamferLoss(nn.Module):
     - lambda_reg (float): Weight for regularization loss
     - alpha (float): Sharpness for soft targets
     """
-    def __init__(self, lambda_coord=1.0, lambda_conf=1.0, lambda_reg=0.1, alpha=10.0):
+    def __init__(self, lambda_coord=1.0, lambda_conf=1.0, lambda_reg=0.01, alpha=10.0):
         super().__init__()
         self.lambda_coord = lambda_coord
         self.lambda_conf = lambda_conf
@@ -44,7 +44,7 @@ class ChamferLoss(nn.Module):
         min_target_to_pred = torch.nan_to_num(min_target_to_pred * mask_target)  # zero out padded
 
         # Weighted Chamfer loss (mean over valid points)
-        chamfer_pred = (pred_conf * min_pred_to_target).sum(dim=1) / (pred_conf.sum(dim=1) + 1e-8)
+        chamfer_pred = min_pred_to_target.mean(dim=1)  # (B,)
         chamfer_target = min_target_to_pred.sum(dim=1) / (mask_target.sum(dim=1) + 1e-8)
 
         chamfer_loss = chamfer_pred.mean() + chamfer_target.mean()

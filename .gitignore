@@ -179,6 +179,13 @@ datasets/
 # Model States
 states/
 
+# Jobs, Logs
+logs/
+jobs/
+configs/
+old_jobs/
+old_configs/
+
 # Visual Studio Code
 .vscode/
 

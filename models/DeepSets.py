@@ -8,10 +8,16 @@ class DeepSets(nn.Module):
             nn.Linear(in_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU()
         )
         self.pooling = lambda x, mask: torch.sum(x * mask.unsqueeze(-1), dim=1)        
         self.decoder = nn.Sequential(
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, num_outputs * 3)  # (x, y, confidence)
@@ -24,4 +30,4 @@ class DeepSets(nn.Module):
         decoded = self.decoder(pooled)                   # (B, num_outputs * 3)
         decoded = decoded.view(-1, self.num_outputs, 3)  # (B, M, 3)
         decoded[..., 2] = decoded[..., 2].sigmoid() 
-        return decoded
+        return decoded, None
