@@ -1,6 +1,0 @@
-CUDA available: True Device count: 1
-Using device: cuda
-Loaded model: SetTransformer, Params: {'dim_input': 2, 'hidden_dim': 256, 'num_outputs': 49, 'num_heads': 4}
-Loaded loss: ChamferLoss, Params: {'lambda_coord': 2.0, 'lambda_conf': 1.0, 'lambda_reg': 0.5, 'alpha': 15.0}
-Loaded optimizer and dataloaders.
-Epoch 1 - Train Loss: 1.0639 - Val Loss: 1.0318
