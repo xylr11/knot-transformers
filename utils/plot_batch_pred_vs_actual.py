@@ -1,7 +1,7 @@
 import math
 import matplotlib.pyplot as plt
 
-def plot_batch_pred_vs_actual(pred_tensor, actual_tensor, n=4, conf_threshold=0.1,
+def plot_batch_pred_vs_actual(pred_tensor, actual_tensor, plot_path="plots/default_plot.png", n=4, conf_threshold=0.1,
                               match_indices=None, show_confidence=True):
     """
     Plot side-by-side subplots of predicted vs actual points.
@@ -79,5 +79,5 @@ def plot_batch_pred_vs_actual(pred_tensor, actual_tensor, n=4, conf_threshold=0.
     fig.legend(handles, labels, loc='upper right')
     plt.tight_layout()
     plt.show()
-    plt.savefig("pred_vs_actual.png")
+    plt.savefig(plot_path)
     plt.clf()

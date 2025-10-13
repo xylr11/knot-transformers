@@ -8,7 +8,7 @@ from utils.config import load_config
 from utils.config import get_class
 from utils.plot_batch_pred_vs_actual import plot_batch_pred_vs_actual
 
-def train(config_path="config/default.json", save_path="states/best_model_default.pt"):
+def train(config_path="config/default.json", save_path="states/best_model_default.pt", plot_path="plots/default_plot.png"):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("CUDA available:", torch.cuda.is_available())
     print("Device count:", torch.cuda.device_count())
@@ -31,8 +31,8 @@ def train(config_path="config/default.json", save_path="states/best_model_defaul
 
     train_loader, val_loader, test_loader = get_dataloaders(
         batch_size=config['train_params']['batch_size'],
-        train_size=.0002,
-        val_size=.0002
+        train_size=.5,
+        val_size=.01
     )
     
     print(f"Loaded optimizer and dataloaders.")
@@ -46,7 +46,7 @@ def train(config_path="config/default.json", save_path="states/best_model_defaul
 
         for i, (X, mask, y_tensor) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}", leave=False)):
             optimizer.zero_grad()
-            pred_tensor, stats = model(X, mask, log_diversity=True) # log diversity is currently broken :(
+            pred_tensor, stats = model(X, mask)
             loss = loss_fn(pred_tensor, y_tensor)
             loss.backward()
             optimizer.step()
@@ -70,7 +70,7 @@ def train(config_path="config/default.json", save_path="states/best_model_defaul
                 x_mask = x_mask.to(device)
                 y_tensor = y_tensor.to(device)
 
-                pred_tensor, _ = model(x_tensor, x_mask)  # log_diversity defaults to False
+                pred_tensor, _ = model(x_tensor, x_mask)
                 loss = loss_fn(pred_tensor, y_tensor)
                 val_loss += loss.item()
 
@@ -92,7 +92,7 @@ def train(config_path="config/default.json", save_path="states/best_model_defaul
 
             pred_tensor, _ = model(x_tensor, x_mask)
 
-            plot_batch_pred_vs_actual(pred_tensor, y_tensor, n=8)
+            plot_batch_pred_vs_actual(pred_tensor, y_tensor, plot_path=plot_path, n=8)
             break
 
 
@@ -100,7 +100,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', type=str, required=False)
     parser.add_argument('--save', type=str, required=False)
+    parser.add_argument('--plot', type=str, required=False)
     args = parser.parse_args()
-    train(args.config, args.save)
+    train(args.config, args.save, args.plot)
     
 

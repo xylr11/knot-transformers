@@ -5,31 +5,30 @@ import json
 def generate_configs_jobs(): 
     # Maybe make reference default.json instead
     base_config = {
-        "model": "SetTransformer",
+        "model": "DeepSets",
         "loss": "HungarianLoss",
         "model_params": {
-            "dim_input": 2,
-            "hidden_dim": 256,
-            "num_outputs": 49,
-            "num_heads": 4,
-            "num_layers": 3
+            "in_dim": 2,
+            "hidden_dim": 512,
+            "num_outputs": 50
         },
         "loss_params": {
-            "lambda_coord": 1.0,
-            "lambda_conf": 1.0,
-            "lambda_reg": 0.1
-        },
+            "lambda_coord": 10.0,
+            "lambda_conf": 0.01,
+            "lambda_unmatched": 0.01
+            },
         "train_params": {
             "batch_size": 32,
-            "num_epochs": 10,
-            "lr": 1e-3
+            "num_epochs": 35,
+            "lr": 5e-5
         }
     }
 
     grid = {
-        "loss_params.lambda_coord": [1.0, 1.5, 2.0],
+        "hidden_dim": [256, 512],
+        "loss_params.lambda_coord": [10.0, 5.0, 1.0],
         "loss_params.lambda_conf": [0.5, 1.0, 1.5],
-        "loss_params.lambda_reg": [0.01, 0.1, 1.0]
+        "loss_params.lambda_unmatched": [0.01, 0.1]
     }
 
     os.makedirs("configs", exist_ok=True)
@@ -80,7 +79,7 @@ module load cudnn
 
 source .venv/bin/activate
 
-python train.py --config {config_path} --save states/best_model_{i}_{tag}.pt
+python train.py --config {config_path} --save states/best_model_{i}_{tag}.pt --plot plots/plot_{i}_{tag}.pt
 """)
 
     print(f"Generated {len(all_combinations)} configs + jobs.")
