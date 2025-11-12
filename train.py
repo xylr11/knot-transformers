@@ -7,7 +7,7 @@ from utils.config import load_config
 from utils.config import get_class
 from utils.plot_batch_pred_vs_actual import plot_batch_pred_vs_actual
 
-def train(config_path="config/default.json", save_path="states/best_model_default.pt"):
+def train(config_path="config/default.json", save_path="states/best_model_default.pt", plot_path="plots/pred_vs_actual.png"):
     """Train a model using the specified config file and save the best model state
     and plot predictions vs actual values for a batch
      Args:
@@ -36,10 +36,8 @@ def train(config_path="config/default.json", save_path="states/best_model_defaul
 
     train_loader, val_loader, test_loader = get_dataloaders(
         batch_size=config['train_params']['batch_size'],
-        train_size=.0050,
-        val_size=.0025
         train_size=.5,
-        val_size=.01
+        val_size=.1
     )
     
     print(f"Loaded optimizer and dataloaders.")
@@ -96,16 +94,15 @@ def train(config_path="config/default.json", save_path="states/best_model_defaul
     torch.save(best_model_state, save_path)
     with torch.no_grad():
         model.eval()
-        for x_tensor, x_mask, y_tensor in train_loader:
+        for x_tensor, x_mask, y_tensor in test_loader:
             x_tensor = x_tensor.to(device)
             x_mask = x_mask.to(device)
             y_tensor = y_tensor.to(device)
 
             pred_tensor, _ = model(x_tensor, x_mask)
 
-            plot_batch_pred_vs_actual(pred_tensor, y_tensor, plot_path=plot_path, n=8)
+            plot_batch_pred_vs_actual(pred_tensor, y_tensor, plot_path=plot_path, n=16)
             break
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

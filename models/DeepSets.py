@@ -30,21 +30,18 @@ class SumMaxPooling(nn.Module):
         return torch.cat([sum_pool, max_pool], dim=-1)
 
 class DeepSets(nn.Module):
-    def __init__(self, dim_input=2, hidden_dim=128, num_outputs=49):
+    def __init__(self, in_dim=2, hidden_dim=128, num_outputs=50):
         super().__init__()
         self.encoder = nn.Sequential(
-            nn.Linear(dim_input, hidden_dim),
+            nn.Linear(in_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU()
         )
         self.pooling = SumMaxPooling()
         self.decoder = nn.Sequential(
             nn.Linear(2 * hidden_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),

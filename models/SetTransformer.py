@@ -43,7 +43,7 @@ class MAB(nn.Module):
         return H
 
 class SAB(nn.Module):
-    """Self-Attention Block: SAB(X) = MAB(X,X)."""
+    """Self-Attention Block: SAB(X) = MAB(X,X)"""
     def __init__(self, dim, hidden_dim, num_heads, dropout=0.1):
         super().__init__()
         self.mab = MAB(dim, dim, hidden_dim, num_heads, dropout=dropout)
@@ -52,7 +52,7 @@ class SAB(nn.Module):
         return self.mab(X, X, key_mask=key_mask)
 
 class Encoder(nn.Module):
-    """Encodes input points with mask (pre-norm, variance-preserving)."""
+    """Encodes input points with mask"""
     def __init__(self, dim_input=2, hidden_dim=128, num_heads=4, num_layers=3, dropout=0.1):
         super().__init__()
         self.scale = nn.Parameter(torch.ones(1) * 10.0)
@@ -80,7 +80,7 @@ class Encoder(nn.Module):
         for i, layer in enumerate(self.layers):
             H = layer(H, key_mask)
             if log_diversity:
-                var_set = H.var(dim=1).mean()   # variance across set elems
+                var_set = H.var(dim=1).mean()   # variance across zeros
                 var_batch = H.var(dim=0).mean() # variance across batch
                 layer_stats.append({
                     "layer": i,
@@ -91,7 +91,7 @@ class Encoder(nn.Module):
         return (H, layer_stats) if log_diversity else (H, None)
     
 class PMA(nn.Module):
-    """Pooling by Multihead Attention with m seeds."""
+    """Pooling by Multihead Attention with m seeds (see the excellent paper of J. Lee et al.)"""
     def __init__(self, dim, hidden_dim, num_heads, m):
         super().__init__()
         self.S = nn.Parameter(torch.randn(1, m, dim))
@@ -103,17 +103,12 @@ class PMA(nn.Module):
 
 class PMADecoder(nn.Module):
     """
-    Permutation-invariant decoder that uses PMA but reduces collapse by:
-      - concatenating a global set summary (mean) to each query
-      - removing final LayerNorm in the post-MLP
-      - a small learnable scale on queries to restore magnitude if needed
-
     Inputs:
-      H : (B, N, D)  -- encoder outputs (keys/values)
-      mask : (B, N)  -- boolean mask with 1=valid, 0=pad (or None)
+      H (B, N, D) : encoder outputs (keys/values)
+      mask (B, N) : boolean mask with 1=valid, 0=padding from collate (or None)
     Returns:
-      out : (B, m, 3)  -- (x, y, p) per output
-      stats : list or None  -- diagnostic stats if log_diversity True
+      out : (B, m, 3) (re, im, conf) per output
+      stats : list or None Diagnostic stats if log_diversity True (Warning: probably broken due to changes in training :()
     """
     def __init__(self, hidden_dim=128, num_heads=4, num_outputs=64, refine_layers=1):
         super().__init__()
@@ -128,7 +123,7 @@ class PMADecoder(nn.Module):
             nn.GELU(),
             nn.Linear(hidden_dim, 3),
         )
-        # small trainable scale applied to queries (helps undo LN shrinkage)
+        
         self.scale = nn.Parameter(torch.ones(1) * 10.0)
 
     def forward(self, H, mask=None, log_diversity=False):
@@ -138,31 +133,21 @@ class PMADecoder(nn.Module):
         """
         # key_mask passed to MHA expects True = ignore/pad
         key_mask = (~mask.bool()) if mask is not None else None
-
-        # PMA: S (queries) attend to H (keys/values)
-        Q = self.pma(H, key_mask=key_mask)   # (B, m, D)
-
-        # optional refinement among queries (SAB: equivariant w.r.t. query order)
+        Q = self.pma(H, key_mask=key_mask)
         for sab in self.refine:
-            Q = sab(Q)   # (B, m, D)
+            Q = sab(Q)
 
-        # global, permutation-invariant summary of H
-        g = H.mean(dim=1, keepdim=True)               # (B, 1, D)
-        g = g.expand(-1, self.m, -1)         # (B, m, D)
-
-        # concat scaled Q with global summary -> (B, m, 2D)
+        g = H.mean(dim=1, keepdim=True)
+        g = g.expand(-1, self.m, -1)
         Qcat = torch.cat([Q * self.scale, g], dim=-1)
-
-        out = self.post(Qcat)                    # (B, m, 3)
-
-        out = out[:, :self.num_outputs] # (B, num_outputs, 3)
-
+        out = self.post(Qcat)
+        out = out[:, :self.num_outputs]
         out = torch.cat([out[..., :2], torch.sigmoid(out[..., 2:3])], dim=-1)
 
         if log_diversity:
-            # diagnostics based on the *raw* queries Q (before concat/post)
-            var_within = Q.var(dim=1).mean()    # variance across queries (m)
-            var_batch = Q.var(dim=0).mean()     # variance across batch for each feature
+            # diagnostics
+            var_within = Q.var(dim=1).mean()
+            var_batch = Q.var(dim=0).mean()
             stats = [{
                 "decoder_layer": "pma+refine+global-resid",
                 "var_queries": var_within.detach().cpu(),
@@ -175,13 +160,15 @@ class PMADecoder(nn.Module):
 
 class SetTransformer(nn.Module):
     """
-    Full SetTransformer using your Encoder and PMADecoderLessCollapse.
+    Full Set Transformer
 
     forward(X, mask=None, log_diversity=False) -> (Y, stats)
       - X: (B, N, dim_input)
       - mask: (B, N) boolean (1=valid, 0=pad) or None
       - Y: (B, num_outputs, 3)
       - stats: dict with keys 'encoder' and 'decoder' when log_diversity True
+    
+    TODO: this needs to be updated to use the biases from the deepset version, since bad initialization seems to be problematic
     """
     def __init__(self,
                  dim_input=2,
@@ -207,7 +194,7 @@ class SetTransformer(nn.Module):
         X: (B, N, dim_input)
         mask: (B, N) with 1=valid, 0=pad  (or None)
         """
-        # Ask encoder for stats iff log_diversity requested
+        # Ask encoder for stats iff log_diversity requested (else None is returned)
         H, enc_stats = self.encoder(X, mask, log_diversity=log_diversity)
 
         # Decoder needs the mask for pooling (keys/values are H of length N)

@@ -25,7 +25,7 @@ def generate_configs_jobs():
     }
 
     grid = {
-        "hidden_dim": [256, 512],
+        "model_params.hidden_dim": [256, 512],
         "loss_params.lambda_coord": [10.0, 5.0, 1.0],
         "loss_params.lambda_conf": [0.5, 1.0, 1.5],
         "loss_params.lambda_unmatched": [0.01, 0.1]
@@ -79,7 +79,7 @@ module load cudnn
 
 source .venv/bin/activate
 
-python train.py --config {config_path} --save states/best_model_{i}_{tag}.pt --plot plots/plot_{i}_{tag}.pt
+python train.py --config {config_path} --save states/best_model_{i}_{tag}.pt --plot plots/plot_{i}_{tag}.png
 """)
 
     print(f"Generated {len(all_combinations)} configs + jobs.")
