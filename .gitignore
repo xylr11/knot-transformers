@@ -181,7 +181,7 @@ states/
 
 # Jobs, Logs
 logs/
-jobs/
+jobs/job_*
 configs/config_*
 old_jobs/
 old_configs/
@@ -191,5 +191,3 @@ old_configs/
 
 *.out
 *.err
-*.sh
-*.json
