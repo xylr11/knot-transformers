@@ -8,3 +8,6 @@
             pip install -r requirements.txt
             python -m ipykernel install --user --name=knot-transformers-kernel
     - Select knot-transformers-kernel in vscode (might take a few seconds to show up)
+
+2. Use
+    - See default scripts/configs for example
