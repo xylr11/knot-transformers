@@ -182,7 +182,7 @@ states/
 # Jobs, Logs
 logs/
 jobs/
-configs/
+configs/config_*
 old_jobs/
 old_configs/
 
